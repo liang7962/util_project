@@ -116,8 +116,8 @@ public class ExportExcelByPoiUtil {
                             }
                         }
                     }
-                    if(j==columnLists.size()-1 ){//最后一列不参与分组
-                        //当取到最后一列的时候，判断起始列是否相等，如果相等，则进行一次合并操作，不相等则不处理
+                    if(j==columnLists.size()-1 ){
+                        //当取到最后一列的时候，判断和前一列是否相等，如果相等，则进行一次合并操作，不相等则不处理
                         if (columns[measureLength*i]<columns[measureLength*i+1]){
                             CellRangeAddress cra=new CellRangeAddress(i, i, columns[measureLength*i]-1, columns[measureLength*i+1]-1);
                             sheet.addMergedRegion(cra);
@@ -234,10 +234,9 @@ public class ExportExcelByPoiUtil {
                             }
 
                         }
-
 //                        cell.setCellValue(StringUtils.isBlank(map.get(title[i]))?"0":map.get(title[i]));
                         cell.setCellStyle(cellStyle);
-                        /*在每一个单元格处理完成后，把这个单元格内容设置为old内容*/
+
                     }
                     index++;
                 }
@@ -266,27 +265,6 @@ public class ExportExcelByPoiUtil {
             }
         }
         return localPath;
-    }
-
-
-    /*
-    * 自动合并行
-    * */
-    private static  int mergeRow(int start,int end,int lastStart,List<Map<String, String>> list,String[] title,int i,Sheet sheet,int length) {
-        for (int h=start-1;h<=end-1;h++){
-            String preStr=list.get(h-length).get(title[i-1]);
-            String preNextStr=list.get(h-length+1).get(title[i-1]);
-            if(!preStr.equals(preNextStr)){
-                if (lastStart<h){
-                    CellRangeAddress cra=new CellRangeAddress(start-1, h, i, i);
-                    //在sheet里增加合并单元格
-                    sheet.addMergedRegion(cra);
-                }
-                //有数据不同则需要加1
-                lastStart=h+1;
-            }
-        }
-        return lastStart;
     }
 
     /**
@@ -384,25 +362,5 @@ public class ExportExcelByPoiUtil {
         }
         return cellStyle;
     }
-    /**
-     *
-     * @Title: setRegionStyle
-     * @Description: TODO(合并单元格后边框不显示问题)
-     * @author: GMY
-     * @date: 2018年5月10日 上午10:46:00
-     * @param @param sheet
-     * @param @param region
-     * @param @param cs    设定文件
-     * @return void    返回类型
-     * @throws
-     */
-    public static void setRegionStyle(Sheet sheet, CellRangeAddress region, CellStyle cs) {
-        for (int i = region.getFirstRow(); i <= region.getLastRow(); i++) {
-            Row row = CellUtil.getRow(i, sheet);
-            for (int j = region.getFirstColumn(); j <= region.getLastColumn(); j++) {
-                Cell cell = CellUtil.getCell(row, (short) j);
-                cell.setCellStyle(cs);
-            }
-        }
-    }
+
 }
