@@ -5,12 +5,9 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.example.demo.constant.Constant;
 import com.example.demo.util.StrUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
@@ -73,8 +70,8 @@ public class ExportExcelByPoiUtil {
             List<String[]> columnLists=new ArrayList<>();
             //列数据
             for (String column:columnList) {
-                String[] split=column.split(Constant.CONSTANT_STR);
-                columnLists.add(split);
+                List<String> stringList = keyMap.get(column);
+                columnLists.add(stringList.toArray(new String[0]));
             }
             CellStyle cellStyle_export = style(3, workbook);
             // 正文
