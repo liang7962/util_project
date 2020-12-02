@@ -117,7 +117,7 @@ public class ExportExcelByPoiUtil {
                         }
                     }
                     if(j==columnLists.size()-1 ){//最后一列不参与分组
-                        //当取到最后一列的时候，判断起始列是否相等，如果不相等，则进行一次合并操作，不相等则不处理
+                        //当取到最后一列的时候，判断起始列是否相等，如果相等，则进行一次合并操作，不相等则不处理
                         if (columns[measureLength*i]<columns[measureLength*i+1]){
                             CellRangeAddress cra=new CellRangeAddress(i, i, columns[measureLength*i]-1, columns[measureLength*i+1]-1);
                             sheet.addMergedRegion(cra);

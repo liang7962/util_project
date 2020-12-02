@@ -24,7 +24,7 @@ public class Conroller {
     @Value("classpath:resJson.json")
     private Resource resJsonRes;
 
-    @RequestMapping("/exportSafeConfess")
+/*    @RequestMapping("/exportSafeConfess")
     public void exportSafeConfess( HttpServletResponse response) throws IOException {
 
         String[] columnParams={"viw_bikyn_dim_date_ss_desc","viw_bikyn_dim_date_mon_desc"};//列条件
@@ -86,6 +86,7 @@ public class Conroller {
             //对于相同行的数据需要合并--dataList
             List<Integer> delIndex=new ArrayList<>();//需要删除的下标，需要修改的目标下标
 
+            //查询出有多少行数据，并标记其对应的下标
             List<String[]> rowList=new ArrayList<>();
             for (int i=0;i<dataList.size();i++){
                 String rowStr="";
@@ -174,7 +175,7 @@ public class Conroller {
             //行
             ExportExcelByPoiUtil.createExcel( response, titleAttr, titleHead, widthAttr, map, rowParams.length, columnParams.length+1,columnList,measureParams.length,keyMap);
         }
-    }
+    }*/
 
 
     @RequestMapping("/exportTwo")
@@ -187,30 +188,33 @@ public class Conroller {
         String[] measureParamsStr={"总交易笔数","成功交易笔数"};//度条件解释--取值map
 
         ObjectMapper objMap = new ObjectMapper();
-
         JsonNode root = objMap.readTree(resJsonRes.getInputStream());
         Map<String, Object> souceDataMap = objMap.convertValue(root, Map.class);
         if (null!=souceDataMap.get("code") && (int)souceDataMap.get("code")==200 && (Boolean) souceDataMap.get("succ") ){
+            //keyMap 排除excel中 行所占列的列数据
             Map<String,List<String>> keyMap=new HashMap();
-
             List<Map<String,List<Map<String,String>>>> souceDataList=(List<Map<String,List<Map<String,String>>>>)souceDataMap.get("data");
+            //excel标题
             String titleHead = "全渠道主题（日）";
+            //需要处理的数据
             List<Map<String, String>> dataList = new ArrayList<Map<String, String>>();
 
             for(int i=0;i<souceDataList.size();i++) {
+                //dataList中的每条数据
                 Map<String, String> temp = new HashMap<>();
                 List<Map<String, String>> list1 = souceDataList.get(i).get("cols");
                 for (Map<String, String> map1:list1){
                     temp.put(map1.get("k"),map1.get("v"));
                 }
 
-                //动态赋值 -
+                //动态赋值
                 String columnStr="";
                 List<String> list=new ArrayList<>();
                 for (String column:columnParams){
                     columnStr+=temp.get(column);
                     list.add(temp.get(column));
                 }
+
                 for (int j=0;j<measureParams.length;j++){
                     List<String> list2=new ArrayList<>();
                     list2.addAll(list);
@@ -230,7 +234,7 @@ public class Conroller {
                 }
                 columnSet.add(columnStr);
             }
-
+            //列数据再组合上 度条件
             List<String> columnList=new ArrayList<String>();
             for (String column:columnSet){
                 for (String measure:measureParamsStr){
@@ -239,7 +243,9 @@ public class Conroller {
             }
 
             //对于相同行的数据需要合并--dataList
-            List<Integer> delIndex=new ArrayList<>();//需要删除的下标，需要修改的目标下标
+            //需要删除的下标，需要修改的目标下标
+            List<Integer> delIndex=new ArrayList<>();
+            //查询出有多少行数据，并记录其对应的下标--后续需要进行数据合并时使用
             List<String[]> rowList=new ArrayList<>();
             for (int i=0;i<dataList.size();i++){
                 String rowStr="";
@@ -252,8 +258,8 @@ public class Conroller {
                         if (rowStr.equals(rowList.get(j)[0])){
                             //如果存在，则将当前的原始map新增当前map不存在的key值 i是需要删除的map下标，j为需要保留的map下标
                             Map<String, String> paramsMap=dataList.get(i);
-                            Integer index=Integer.parseInt(rowList.get(j)[1]);
 
+                            Integer index=Integer.parseInt(rowList.get(j)[1]);
                             Map<String, String> souceMap=dataList.get(index);
                             MapUtil.mapUpdCopy(paramsMap,souceMap);
                             dataList.set(index,souceMap);
@@ -285,12 +291,13 @@ public class Conroller {
                 }
             }
 
-
+            //字体高度
             int widthAttr[] = new int[rowParams.length+columnSet.size()*measureParams.length];
             for (int i=0;i<widthAttr.length;i++){
                 widthAttr[i]=30;
             }
 
+            //有多少列数据，对应的列头
             String[] titleAttr=new String[rowParams.length+columnSet.size()*measureParams.length];
             for (int i=0;i<rowParams.length;i++){
                 titleAttr[i]=rowParams[i];
